@@ -12,6 +12,7 @@
 #include <cstdint>
 
 #include <vector>
+#include <map>
 
 #include "Logger.hh"
 
@@ -40,17 +41,20 @@ namespace vector_sim_gen
 
         }
 
-        inline size_t getSize() noexcept
+        inline size_t 
+        getSize() noexcept
         {
             return m_blockSize;
         }
 
-        inline std::uint8_t* getStartAddr() noexcept
+        inline std::uint8_t* 
+        getStartAddr() noexcept
         {
             return m_blockData;
         }
 
-        inline std::uint8_t* getOffsetAddr(uintptr_t p_offset) noexcept
+        inline std::uint8_t* 
+        getOffsetAddr(uintptr_t p_offset) noexcept
         {
             uintptr_t startAddr = reinterpret_cast<uintptr_t>(m_blockData);
             return (reinterpret_cast<std::uint8_t*>(startAddr) + p_offset);
@@ -99,17 +103,20 @@ namespace vector_sim_gen
 
         }
 
-        void setFilePath(const char* p_filePath) noexcept
+        void 
+        setFilePath(const char* p_filePath) noexcept
         {
             m_filePath = p_filePath;
         }
 
-        std::string& getFilePath() noexcept
+        std::string& 
+        getFilePath() noexcept
         {
             return m_filePath;
         }
 
-        void setVectorInfo(std::uint32_t p_vectorType, std::uint32_t p_dimensionSize)
+        void 
+        setVectorInfo(std::uint32_t p_vectorType, std::uint32_t p_dimensionSize)
         {
             switch (p_vectorType)
             {
@@ -138,7 +145,8 @@ namespace vector_sim_gen
             m_dimensionSize = p_dimensionSize;
         }
 
-        void readVectorFile() noexcept
+        void 
+        readVectorFile() noexcept
         {
             // Default (Binary form)
             // <4 bytes int representing num_vectors>
@@ -220,7 +228,50 @@ namespace vector_sim_gen
             vectorFile.close();
         }
 
-        
+        const size_t
+        checkVectorDuplicates(std::map<size_t, size_t>& p_dupCountMap) noexcept
+        {
+            for (size_t curIdx = 0; curIdx < m_vectorList.size() - 1; curIdx++)
+            {
+                bool foundDup = false;
+
+                if (p_dupCountMap.find(curIdx) != p_dupCountMap.end())
+                    continue;
+
+                for (size_t cmpIdx = curIdx + 1; cmpIdx < m_vectorList.size(); cmpIdx++)
+                {
+                    auto* curBuffer = m_vectorList[curIdx].get();
+                    auto* cmpBuffer = m_vectorList[cmpIdx].get();
+
+                    if (curBuffer->getSize() != cmpBuffer->getSize())
+                        continue;
+
+                    int rc = std::memcmp(
+                        curBuffer->getStartAddr(),
+                        cmpBuffer->getStartAddr(),
+                        curBuffer->getSize()
+                    );
+
+                    if (rc == 0)
+                    {
+                        if (!foundDup) 
+                        {
+                            foundDup = true;
+                            p_dupCountMap.insert(std::make_pair(curIdx, 2));
+                        }
+                        else
+                            p_dupCountMap[curIdx]++;
+
+                    }
+                }
+
+                if (!foundDup)
+                    p_dupCountMap.insert(std::make_pair(curIdx, 1));
+            }
+
+            return p_dupCountMap.size();
+        }
+
     };
 }
 

@@ -60,10 +60,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/sjoon/Documents/git/VectorSimGen
+CMAKE_SOURCE_DIR = /home/sjoon/Documents/workspace-vectordb/sptag-result/VectorSimGen
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/sjoon/Documents/git/VectorSimGen
+CMAKE_BINARY_DIR = /home/sjoon/Documents/workspace-vectordb/sptag-result/VectorSimGen
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -90,9 +90,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/sjoon/Documents/git/VectorSimGen/CMakeFiles /home/sjoon/Documents/git/VectorSimGen//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/sjoon/Documents/workspace-vectordb/sptag-result/VectorSimGen/CMakeFiles /home/sjoon/Documents/workspace-vectordb/sptag-result/VectorSimGen//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/sjoon/Documents/git/VectorSimGen/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/sjoon/Documents/workspace-vectordb/sptag-result/VectorSimGen/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -116,7 +116,7 @@ preinstall/fast:
 
 # clear depends
 depend:
-	$(CMAKE_COMMAND) -P /home/sjoon/Documents/git/VectorSimGen/CMakeFiles/VerifyGlobs.cmake
+	$(CMAKE_COMMAND) -P /home/sjoon/Documents/workspace-vectordb/sptag-result/VectorSimGen/CMakeFiles/VerifyGlobs.cmake
 	$(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
@@ -241,7 +241,7 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	$(CMAKE_COMMAND) -P /home/sjoon/Documents/git/VectorSimGen/CMakeFiles/VerifyGlobs.cmake
+	$(CMAKE_COMMAND) -P /home/sjoon/Documents/workspace-vectordb/sptag-result/VectorSimGen/CMakeFiles/VerifyGlobs.cmake
 	$(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 
