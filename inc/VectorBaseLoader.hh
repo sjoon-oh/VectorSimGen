@@ -14,6 +14,8 @@
 #include <vector>
 #include <map>
 
+#include <thread>
+
 #include "Buffer.hh"
 #include "VectorOptions.hh"
 #include "Logger.hh"
@@ -76,6 +78,12 @@ namespace vsg
         {
             m_typeSize = p_typeSize;
             m_dimensionSize = p_dimensionSize;
+        }
+
+        void
+        setVectorFile() noexcept
+        {
+
         }
 
         void 

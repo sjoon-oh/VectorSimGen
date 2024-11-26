@@ -19,14 +19,21 @@ namespace vsg
 
     struct VectorTypeInfo
     {
-        std::string m_type;
-        size_t m_size;
+        std::string m_typeStr;
+        size_t m_typeSize;
 
-        VectorTypeInfo(std::string p_type, size_t p_size)
-            : m_type(p_type), m_size(p_size)
+        VectorTypeInfo(std::string p_typeStr, size_t p_typeSize)
+            : m_typeStr(p_typeStr), m_typeSize(p_typeSize)
         {
             
         }
+    };
+
+    struct VectorFileDefaultTemplate
+    {
+        std::int32_t m_numVec;
+        std::int32_t m_dimSize;
+        std::uint8_t* m_vectors;
     };
 
     std::array<struct VectorTypeInfo, 4> g_vectorTypes{
@@ -39,15 +46,15 @@ namespace vsg
 
     namespace option
     {
-        std::uint32_t
+        size_t
         getVectorSize(std::string p_vectorTypeString)
         {
             size_t typeSize = 0;
             for (auto& typeInfo: g_vectorTypes)
             {
-                if (typeInfo.m_type == p_vectorTypeString)
+                if (typeInfo.m_typeStr == p_vectorTypeString)
                 {
-                    typeSize = typeInfo.m_size;
+                    typeSize = typeInfo.m_typeSize;
                     break;
                 }
             }

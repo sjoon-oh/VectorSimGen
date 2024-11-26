@@ -78,6 +78,18 @@ namespace vsg
             m_dimensionSize = p_dimensionSize;
         }
 
+        size_t
+        getRecordSize() const
+        {
+            return m_vectorList.size();
+        }
+
+        std::vector<std::unique_ptr<FixedSizeBuffer>>* 
+        getVectorList()
+        {
+            return &(m_vectorList);
+        }
+
         void 
         readVectorFile() noexcept
         {
@@ -97,10 +109,10 @@ namespace vsg
             size_t fileSize = static_cast<size_t>(vectorFile.tellg());     
 
             // Testing it as the default (binary) type.
-            std::int32_t numVectors;
-            std::int32_t numDimension;
+            std::uint32_t numVectors;
+            std::uint32_t numDimension;
 
-            std::int32_t currentLoadedVectors = 0;
+            std::uint32_t currentLoadedVectors = 0;
 
             // Return the position to the start.
             vectorFile.seekg(0, std::ios::beg);
@@ -113,12 +125,12 @@ namespace vsg
             size_t readOffset = 0;
             
             vectorFile.seekg(readOffset, std::ios::beg);
-            vectorFile.read((char*)&numVectors, sizeof(std::int32_t));
-            readOffset += sizeof(std::int32_t);
+            vectorFile.read((char*)&numVectors, sizeof(std::uint32_t));
+            readOffset += sizeof(std::uint32_t);
 
             vectorFile.seekg(readOffset, std::ios::beg);
-            vectorFile.read((char*)&numDimension, sizeof(std::int32_t));
-            readOffset += sizeof(std::int32_t);
+            vectorFile.read((char*)&numDimension, sizeof(std::uint32_t));
+            readOffset += sizeof(std::uint32_t);
 
             size_t readSize = (numDimension * (int32_t)m_typeSize);
 
@@ -160,6 +172,21 @@ namespace vsg
             }
 
             vectorFile.close();
+        }
+
+
+        void
+        makeUniqueVectorList(std::vector<size_t>& p_vectorIndexList)
+        {
+            std::map<size_t, size_t> dupCountMap;
+            checkVectorDuplicates(dupCountMap);
+
+            for (auto& elem: dupCountMap)
+            {
+                // dupfileLog << elem.first << "\t" << elem.second << std::endl;
+                p_vectorIndexList.emplace_back(elem.first);
+                // Index order (read index)
+            }
         }
 
 

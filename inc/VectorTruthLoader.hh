@@ -79,6 +79,64 @@ namespace vsg
             m_dimensionSize = p_dimensionSize;
         }
 
+        std::vector<std::vector<std::int32_t>>*
+        getTruthVidList()
+        {
+            return &(m_truthVidList);
+        }
+
+        std::vector<std::vector<float>>*
+        getTruthDistList()
+        {
+            return &(m_truthDistList);
+        }
+
+
+        void
+        exportTruthVectorIDs() noexcept
+        {
+            std::ofstream convertTruthHumanReadable("truth-human-readable.csv");
+
+            if (!convertTruthHumanReadable) 
+            {
+                return;
+            }
+
+            for (auto& truthSet: m_truthVidList)
+            {
+                // m_logger->getInstance().getLogger()->info("TruthSet size: {}", truthSet.size());
+                for (auto& singleTruthVid: truthSet)
+                    convertTruthHumanReadable << singleTruthVid << "\t";
+                
+                convertTruthHumanReadable << "\n";
+            }
+
+            convertTruthHumanReadable.close();
+        }
+
+
+        void
+        exportTruthVectorDists() noexcept
+        {
+            std::ofstream convertTruthHumanReadable("truth-human-readable-dists.csv");
+
+            if (!convertTruthHumanReadable) 
+            {
+                return;
+            }
+
+            for (auto& truthSet: m_truthDistList)
+            {
+                // m_logger->getInstance().getLogger()->info("TruthSet size: {}", truthSet.size());
+                for (auto& singleTruthDist: truthSet)
+                    convertTruthHumanReadable << singleTruthDist << "\t";
+                
+                convertTruthHumanReadable << "\n";
+            }
+
+            convertTruthHumanReadable.close();
+        }
+
 
         void 
         readTruthFile() noexcept
@@ -92,10 +150,10 @@ namespace vsg
 
             size_t readOffset = 0;
 
-            std::int32_t numCounts;
-            std::int32_t numTopK;
+            std::uint32_t numCounts;
+            std::uint32_t numTopK;
 
-            std::int32_t currentLoadedVectors = 0;
+            std::uint32_t currentLoadedVectors = 0;
 
             vectorFile.seekg(0, std::ios::end);
             size_t fileSize = static_cast<size_t>(vectorFile.tellg());     
@@ -112,18 +170,19 @@ namespace vsg
 
             if (ENABLE_PRINTLOG)
             {
+                m_logger->getInstance().getLogger()->info("Loading the vector IDs.");
                 m_logger->getInstance().getLogger()->info("File info: numCounts({}), numTopK({})", numCounts, numTopK);
                 m_logger->getInstance().getLogger()->info("Expected read size left: {}", leftSize);
             }
 
-            std::int32_t currentCount = 0;
+            std::uint32_t currentCount = 0;
             for (currentCount = 0; currentCount < numCounts; currentCount++)
             {
                 m_truthVidList.emplace_back(std::vector<int32_t>());
 
                 for (int i = 0; i < numTopK; i++)
                 {
-                    std::int32_t vectorId;
+                    std::uint32_t vectorId;
 
                     vectorFile.seekg(readOffset, std::ios::beg);
                     vectorFile.read((char*)&vectorId, sizeof(std::int32_t));
@@ -131,14 +190,18 @@ namespace vsg
                     readOffset += sizeof(std::int32_t);
 
                     m_truthVidList.back().emplace_back(vectorId);
+
+                    // if (ENABLE_PRINTLOG)
+                    //     m_logger->getInstance().getLogger()->info("Added size: numTopK {}", numTopK);
                 }
             }
 
             leftSize = fileSize - readOffset;
 
             if (ENABLE_PRINTLOG)
-            {
+            {  
                 m_logger->getInstance().getLogger()->info("Loaded vector IDs.");
+                m_logger->getInstance().getLogger()->info("Loading the distances.");
                 m_logger->getInstance().getLogger()->info("Expected read size left: {}", leftSize);
             }
 
@@ -156,7 +219,7 @@ namespace vsg
 
                     readOffset += sizeof(float);
 
-                    m_truthVidList.back().emplace_back(vectorDistance);
+                    m_truthDistList.back().emplace_back(vectorDistance);
                 }
             }
 
@@ -169,6 +232,50 @@ namespace vsg
             }
         }
 
+
+        bool
+        isOverlapExist(int p_topk, std::vector<int32_t>& p_set1, std::vector<int32_t>& p_set2)
+        {
+            for (int home_k = 0; home_k < p_topk - 1; home_k++)
+            {
+                
+                for (int away_k = 0; away_k < p_topk; away_k++)
+                {
+                    if (p_set1[home_k] == p_set2[away_k])
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
+
+        void
+        checkOverlapGTs(int p_topk, std::map<size_t, size_t>& p_dupMap)
+        {
+            bool foundDup;
+            
+            for (size_t curIdx = 0; curIdx < m_truthVidList.size() - 1; curIdx++)
+            {
+                foundDup = false;
+
+                // If previously viewed, skip.
+                if (p_dupMap.find(curIdx) != p_dupMap.end())
+                    continue;
+
+                else
+                {
+                    for (size_t cmpIdx = curIdx + 1; cmpIdx < m_truthVidList.size(); cmpIdx++)
+                    {
+                        if (isOverlapExist(10, m_truthVidList[curIdx], m_truthVidList[cmpIdx]))
+                        {
+                            p_dupMap.insert(std::make_pair(curIdx, 1));
+                            p_dupMap.insert(std::make_pair(cmpIdx, 1));
+                        }
+                    }
+                }
+            }
+        }
     };
 }
 
